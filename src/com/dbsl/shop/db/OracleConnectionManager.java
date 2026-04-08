@@ -5,9 +5,9 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public final class OracleConnectionManager {
-    private static final String DB_URL = "jdbc:oracle:thin:@localhost:1521/XEPDB1";
+    private static final String DB_URL = "jdbc:oracle:thin:@localhost:1521:FREE";
     private static final String DB_USER = "system";
-    private static final String DB_PASSWORD = "oracle";
+    private static final String DB_PASSWORD = "6184";
 
     static {
         try {
