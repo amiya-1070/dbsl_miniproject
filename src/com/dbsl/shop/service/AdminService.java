@@ -1,3 +1,5 @@
+//AdminService.java
+
 package com.dbsl.shop.service;
 
 import com.dbsl.shop.db.OracleConnectionManager;
@@ -94,6 +96,62 @@ public class AdminService {
                 """;
         return runSelect(sql);
     }
+    
+
+	public java.util.Map<String, String> loadAdminProfile(int userId) throws SQLException {
+		String sql = "SELECT username, email, phone, full_name FROM app_user WHERE user_id = ?";
+		try (Connection connection = OracleConnectionManager.getConnection();
+		     PreparedStatement statement = connection.prepareStatement(sql)) {
+		    statement.setInt(1, userId);
+		    try (ResultSet resultSet = statement.executeQuery()) {
+		        java.util.Map<String, String> map = new java.util.LinkedHashMap<>();
+		        if (resultSet.next()) {
+		            map.put("username",  nullSafe(resultSet.getString("username")));
+		            map.put("email",     nullSafe(resultSet.getString("email")));
+		            map.put("phone",     nullSafe(resultSet.getString("phone")));
+		            map.put("full_name", nullSafe(resultSet.getString("full_name")));
+		        }
+		        return map;
+		    }
+		}
+	}
+
+	public void updateAdminProfile(int userId, String username, String email,
+		                            String phone, String fullName, String newPassword) throws SQLException {
+		try (Connection connection = OracleConnectionManager.getConnection()) {
+		    if (newPassword != null && !newPassword.isBlank()) {
+		        String sql = """
+		                UPDATE app_user SET username=?, email=?, phone=?, full_name=?,
+		                password_hash=STANDARD_HASH(?, 'SHA256') WHERE user_id=?
+		                """;
+		        try (PreparedStatement st = connection.prepareStatement(sql)) {
+		            st.setString(1, username);
+		            st.setString(2, email);
+		            st.setString(3, phone);
+		            st.setString(4, fullName);
+		            st.setString(5, newPassword);
+		            st.setInt(6, userId);
+		            st.executeUpdate();
+		        }
+		    } else {
+		        String sql = "UPDATE app_user SET username=?, email=?, phone=?, full_name=? WHERE user_id=?";
+		        try (PreparedStatement st = connection.prepareStatement(sql)) {
+		            st.setString(1, username);
+		            st.setString(2, email);
+		            st.setString(3, phone);
+		            st.setString(4, fullName);
+		            st.setInt(5, userId);
+		            st.executeUpdate();
+		        }
+		    }
+		    connection.commit();
+		}
+	}
+
+	private String nullSafe(String value) {
+		return value == null ? "" : value;
+	}
+
 
     private DefaultTableModel runSelect(String sql) throws SQLException {
         try (Connection connection = OracleConnectionManager.getConnection();

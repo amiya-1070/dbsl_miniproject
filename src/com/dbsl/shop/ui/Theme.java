@@ -1,4 +1,5 @@
 package com.dbsl.shop.ui;
+
 import java.awt.Color;
 import java.awt.Font;
 import javax.swing.BorderFactory;
@@ -18,9 +19,10 @@ public final class Theme {
     public static final Color TEXT        = new Color(10, 18, 24);
     public static final Color GRID        = new Color(169, 203, 227);
 
-    public static final Font TITLE_FONT  = new Font("SansSerif", Font.BOLD, 28);
-    public static final Font HEADER_FONT = new Font("SansSerif", Font.BOLD, 18);
-    public static final Font BODY_FONT   = new Font("SansSerif", Font.PLAIN, 14);
+    // Font sizes increased by 2
+    public static final Font TITLE_FONT  = new Font("SansSerif", Font.BOLD, 30);
+    public static final Font HEADER_FONT = new Font("SansSerif", Font.BOLD, 20);
+    public static final Font BODY_FONT   = new Font("SansSerif", Font.PLAIN, 16);
 
     public static final Border CARD_BORDER = BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(GRID, 1),
@@ -30,81 +32,65 @@ public final class Theme {
     private Theme() {}
 
     public static void applyLookAndFeelDefaults() {
-        // Force cross-platform L&F so Linux GTK doesn't override colors
         try {
             UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        // Panels and general backgrounds
         UIManager.put("Panel.background",              BACKGROUND);
         UIManager.put("Panel.foreground",              TEXT);
         UIManager.put("ContentPane.background",        BACKGROUND);
-
-        // Labels
         UIManager.put("Label.foreground",              TEXT);
         UIManager.put("Label.background",              BACKGROUND);
-
-        // Buttons
+        UIManager.put("Label.font",                    BODY_FONT);
         UIManager.put("Button.background",             ACCENT);
         UIManager.put("Button.foreground",             Color.WHITE);
         UIManager.put("Button.font",                   BODY_FONT);
         UIManager.put("Button.select",                 ACCENT_DARK);
         UIManager.put("Button.focus",                  ACCENT);
-
-        // Text fields
         UIManager.put("TextField.background",          Color.WHITE);
         UIManager.put("TextField.foreground",          TEXT);
         UIManager.put("TextField.caretForeground",     TEXT);
         UIManager.put("TextField.font",                BODY_FONT);
         UIManager.put("TextField.border",              BorderFactory.createLineBorder(GRID, 1));
-
-        // Password fields
         UIManager.put("PasswordField.background",      Color.WHITE);
         UIManager.put("PasswordField.foreground",      TEXT);
         UIManager.put("PasswordField.caretForeground", TEXT);
         UIManager.put("PasswordField.font",            BODY_FONT);
-
-        // Tables
         UIManager.put("Table.background",              Color.WHITE);
         UIManager.put("Table.foreground",              TEXT);
         UIManager.put("Table.font",                    BODY_FONT);
         UIManager.put("Table.gridColor",               GRID);
         UIManager.put("Table.selectionBackground",     ACCENT);
         UIManager.put("Table.selectionForeground",     Color.WHITE);
+        UIManager.put("Table.rowHeight",               28);
         UIManager.put("TableHeader.background",        ACCENT_DARK);
         UIManager.put("TableHeader.foreground",        Color.WHITE);
         UIManager.put("TableHeader.font",              BODY_FONT);
-
-        // Tabs
         UIManager.put("TabbedPane.background",         BACKGROUND);
         UIManager.put("TabbedPane.foreground",         TEXT);
         UIManager.put("TabbedPane.selected",           CARD);
         UIManager.put("TabbedPane.selectedForeground", ACCENT_DARK);
         UIManager.put("TabbedPane.unselectedBackground", PANEL);
         UIManager.put("TabbedPane.font",               BODY_FONT);
-
-        // Scroll panes
         UIManager.put("ScrollPane.background",         BACKGROUND);
         UIManager.put("Viewport.background",           BACKGROUND);
-
-        // Combo boxes
         UIManager.put("ComboBox.background",           Color.WHITE);
         UIManager.put("ComboBox.foreground",           TEXT);
         UIManager.put("ComboBox.font",                 BODY_FONT);
         UIManager.put("ComboBox.selectionBackground",  ACCENT);
         UIManager.put("ComboBox.selectionForeground",  Color.WHITE);
-
-        // Option panes (popups/dialogs)
         UIManager.put("OptionPane.background",         BACKGROUND);
         UIManager.put("OptionPane.messageForeground",  TEXT);
-
-        // Menu
+        UIManager.put("OptionPane.messageFont",        BODY_FONT);
+        UIManager.put("OptionPane.buttonFont",         BODY_FONT);
         UIManager.put("MenuBar.background",            ACCENT_DARK);
         UIManager.put("MenuBar.foreground",            Color.WHITE);
         UIManager.put("MenuItem.background",           BACKGROUND);
         UIManager.put("MenuItem.foreground",           TEXT);
+        UIManager.put("MenuItem.font",                 BODY_FONT);
+        UIManager.put("Spinner.font",                  BODY_FONT);
     }
 
     public static JLabel titleLabel(String text) {
@@ -122,7 +108,7 @@ public final class Theme {
         button.setFocusPainted(false);
         button.setOpaque(true);
         button.setBorderPainted(false);
-        button.setBorder(BorderFactory.createEmptyBorder(10, 18, 10, 18));
+        button.setBorder(BorderFactory.createEmptyBorder(12, 22, 12, 22));
         return button;
     }
 
@@ -134,7 +120,7 @@ public final class Theme {
         button.setFocusPainted(false);
         button.setOpaque(true);
         button.setBorderPainted(false);
-        button.setBorder(BorderFactory.createEmptyBorder(8, 14, 8, 14));
+        button.setBorder(BorderFactory.createEmptyBorder(10, 16, 10, 16));
         return button;
     }
 

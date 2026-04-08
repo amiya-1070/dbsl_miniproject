@@ -1,3 +1,5 @@
+//UserSession.java
+
 package com.dbsl.shop.model;
 
 public class UserSession {

@@ -5,8 +5,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public final class OracleConnectionManager {
-    private static final String DB_URL = "jdbc:oracle:thin:@localhost:1521:FREE";
-    private static final String DB_USER = "system";
+    private static final String DB_URL      = "jdbc:oracle:thin:@localhost:1521:FREE";
+    private static final String DB_USER     = "system";
     private static final String DB_PASSWORD = "6184";
 
     static {
@@ -17,10 +17,11 @@ public final class OracleConnectionManager {
         }
     }
 
-    private OracleConnectionManager() {
-    }
+    private OracleConnectionManager() {}
 
     public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+        Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+        connection.setAutoCommit(false);
+        return connection;
     }
 }
