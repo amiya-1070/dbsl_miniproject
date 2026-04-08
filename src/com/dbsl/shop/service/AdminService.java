@@ -1,0 +1,129 @@
+package com.dbsl.shop.service;
+
+import com.dbsl.shop.db.OracleConnectionManager;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Vector;
+import javax.swing.table.DefaultTableModel;
+
+public class AdminService {
+    public DefaultTableModel loadProducts() throws SQLException {
+        String sql = """
+                SELECT product_id, category_name, sku, product_name, unit_price, stock_qty, reorder_level, status
+                FROM vw_admin_product_editor
+                ORDER BY product_id
+                """;
+        return runSelect(sql);
+    }
+
+    public void insertProduct(int categoryId, String sku, String name, String description,
+                              double price, int stock, int reorderLevel, String status) throws SQLException {
+        String sql = """
+                INSERT INTO vw_admin_product_editor
+                (category_id, sku, product_name, description, unit_price, stock_qty, reorder_level, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """;
+        try (Connection connection = OracleConnectionManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            connection.setAutoCommit(false);
+            statement.setInt(1, categoryId);
+            statement.setString(2, sku);
+            statement.setString(3, name);
+            statement.setString(4, description);
+            statement.setDouble(5, price);
+            statement.setInt(6, stock);
+            statement.setInt(7, reorderLevel);
+            statement.setString(8, status);
+            statement.executeUpdate();
+            connection.commit();
+        }
+    }
+
+    public void updateProduct(int productId, int categoryId, String sku, String name, String description,
+                              double price, int stock, int reorderLevel, String status) throws SQLException {
+        String sql = """
+                UPDATE vw_admin_product_editor
+                SET category_id = ?, sku = ?, product_name = ?, description = ?, unit_price = ?,
+                    stock_qty = ?, reorder_level = ?, status = ?
+                WHERE product_id = ?
+                """;
+        try (Connection connection = OracleConnectionManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            connection.setAutoCommit(false);
+            statement.setInt(1, categoryId);
+            statement.setString(2, sku);
+            statement.setString(3, name);
+            statement.setString(4, description);
+            statement.setDouble(5, price);
+            statement.setInt(6, stock);
+            statement.setInt(7, reorderLevel);
+            statement.setString(8, status);
+            statement.setInt(9, productId);
+            statement.executeUpdate();
+            connection.commit();
+        }
+    }
+
+    public void deleteProduct(int productId) throws SQLException {
+        String sql = "DELETE FROM product WHERE product_id = ?";
+        try (Connection connection = OracleConnectionManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            connection.setAutoCommit(false);
+            statement.setInt(1, productId);
+            statement.executeUpdate();
+            connection.commit();
+        }
+    }
+
+    public DefaultTableModel loadUsers() throws SQLException {
+        String sql = """
+                SELECT user_id, username, role, full_name, email, status, created_at
+                FROM app_user
+                ORDER BY role, user_id
+                """;
+        return runSelect(sql);
+    }
+
+    public DefaultTableModel loadSalesSummary() throws SQLException {
+        String sql = """
+                SELECT order_day, category_name, orders_count, units_sold, revenue
+                FROM vw_sales_summary
+                ORDER BY order_day DESC, revenue DESC
+                """;
+        return runSelect(sql);
+    }
+
+    private DefaultTableModel runSelect(String sql) throws SQLException {
+        try (Connection connection = OracleConnectionManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet resultSet = statement.executeQuery()) {
+            return buildTableModel(resultSet);
+        }
+    }
+
+    private DefaultTableModel buildTableModel(ResultSet resultSet) throws SQLException {
+        Vector<String> columnNames = new Vector<>();
+        int columnCount = resultSet.getMetaData().getColumnCount();
+        for (int column = 1; column <= columnCount; column++) {
+            columnNames.add(resultSet.getMetaData().getColumnLabel(column));
+        }
+
+        Vector<Vector<Object>> rows = new Vector<>();
+        while (resultSet.next()) {
+            Vector<Object> row = new Vector<>();
+            for (int column = 1; column <= columnCount; column++) {
+                row.add(resultSet.getObject(column));
+            }
+            rows.add(row);
+        }
+
+        return new DefaultTableModel(rows, columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+    }
+}
