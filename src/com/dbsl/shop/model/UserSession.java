@@ -1,27 +1,21 @@
-//UserSession.java
-
 package com.dbsl.shop.model;
 
 public class UserSession {
     private final int userId;
-    private final String fullName;
+    private String fullName;
     private final String role;
 
     public UserSession(int userId, String fullName, String role) {
-        this.userId = userId;
+        this.userId   = userId;
         this.fullName = fullName;
-        this.role = role;
+        this.role     = role;
     }
 
-    public int getUserId() {
-        return userId;
-    }
+    public int getUserId()       { return userId; }
+    public String getFullName()  { return fullName; }
+    public String getRole()      { return role; }
 
-    public String getFullName() {
-        return fullName;
-    }
-
-    public String getRole() {
-        return role;
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 }

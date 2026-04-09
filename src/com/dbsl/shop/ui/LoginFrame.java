@@ -45,7 +45,7 @@ public class LoginFrame extends JFrame {
         JPanel switchPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 18, 10));
         switchPanel.setBackground(Theme.BACKGROUND);
         JButton customerButton = Theme.primaryButton("Customer Login");
-        JButton adminButton    = Theme.secondaryButton("Admin Login");
+        JButton adminButton    = Theme.primaryButton("Admin Login");
         JButton signupButton   = Theme.primaryButton("Sign Up");
         customerButton.addActionListener(e -> cardLayout.show(cardPanel, "CUSTOMER"));
         adminButton   .addActionListener(e -> cardLayout.show(cardPanel, "ADMIN"));

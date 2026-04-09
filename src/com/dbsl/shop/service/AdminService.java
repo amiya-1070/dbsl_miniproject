@@ -2,6 +2,9 @@
 
 package com.dbsl.shop.service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import com.dbsl.shop.db.OracleConnectionManager;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -148,18 +151,60 @@ public class AdminService {
 		}
 	}
 
+
+	public DefaultTableModel loadSalesSummaryFiltered(String fromDate, String toDate, String categoryName) throws SQLException {
+		String sql = "SELECT order_day, category_name, orders_count, units_sold, revenue FROM vw_sales_summary WHERE 1=1";
+		List<String> params = new ArrayList<>();
+		if (fromDate != null && !fromDate.isBlank()) {
+		    sql += " AND order_day >= TO_DATE(?, 'YYYY-MM-DD')";
+		    params.add(fromDate);
+		}
+		if (toDate != null && !toDate.isBlank()) {
+		    sql += " AND order_day <= TO_DATE(?, 'YYYY-MM-DD')";
+		    params.add(toDate);
+		}
+		if (categoryName != null && !categoryName.equals("All Categories")) {
+		    sql += " AND LOWER(category_name) = ?";
+		    params.add(categoryName.toLowerCase());
+		}
+		sql += " ORDER BY order_day DESC, revenue DESC";
+
+		try (Connection connection = OracleConnectionManager.getConnection();
+		     PreparedStatement statement = connection.prepareStatement(sql)) {
+		    for (int i = 0; i < params.size(); i++) {
+		        statement.setString(i + 1, params.get(i));
+		    }
+		    try (ResultSet resultSet = statement.executeQuery()) {
+		        return buildTableModel(resultSet);
+		    }
+		}
+	}
+
+	public List<String> loadCategories() throws SQLException {
+		List<String> categories = new ArrayList<>();
+		categories.add("All Categories");
+		String sql = "SELECT category_name FROM category ORDER BY display_order, category_name";
+		try (Connection connection = OracleConnectionManager.getConnection();
+		     PreparedStatement statement = connection.prepareStatement(sql);
+		     ResultSet resultSet = statement.executeQuery()) {
+		    while (resultSet.next()) {
+		        categories.add(resultSet.getString("category_name"));
+		    }
+		}
+		return categories;
+	}
+
 	private String nullSafe(String value) {
 		return value == null ? "" : value;
 	}
 
-
-    private DefaultTableModel runSelect(String sql) throws SQLException {
-        try (Connection connection = OracleConnectionManager.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql);
-             ResultSet resultSet = statement.executeQuery()) {
-            return buildTableModel(resultSet);
-        }
-    }
+		private DefaultTableModel runSelect(String sql) throws SQLException {
+		    try (Connection connection = OracleConnectionManager.getConnection();
+		         PreparedStatement statement = connection.prepareStatement(sql);
+		         ResultSet resultSet = statement.executeQuery()) {
+		        return buildTableModel(resultSet);
+		    }
+		}
 
     private DefaultTableModel buildTableModel(ResultSet resultSet) throws SQLException {
         Vector<String> columnNames = new Vector<>();

@@ -31,6 +31,7 @@ public class AdminDashboardFrame extends JFrame {
     private final JTable productTable   = new JTable();
     private final JTable salesTable     = new JTable();
     private final JTable usersTable     = new JTable();
+    private final JLabel infoLabel 		= new JLabel();
     private final JTextField productIdField   = new JTextField();
     private final JTextField categoryIdField  = new JTextField();
     private final JTextField skuField         = new JTextField();
@@ -61,10 +62,10 @@ public class AdminDashboardFrame extends JFrame {
         header.setBackground(Theme.BACKGROUND);
         header.setBorder(BorderFactory.createEmptyBorder(20, 24, 12, 24));
         header.add(Theme.titleLabel("Admin Dashboard"), BorderLayout.WEST);
-        JLabel info = new JLabel("Signed in as " + session.getFullName());
-        info.setFont(Theme.HEADER_FONT);
-        info.setForeground(Theme.ACCENT_DARK);
-        header.add(info, BorderLayout.EAST);
+		infoLabel.setText("Signed in as " + session.getFullName());
+		infoLabel.setFont(Theme.HEADER_FONT);
+		infoLabel.setForeground(Theme.ACCENT_DARK);
+		header.add(infoLabel, BorderLayout.EAST);
         add(header, BorderLayout.NORTH);
 
         JTabbedPane tabs = new JTabbedPane();
@@ -160,15 +161,71 @@ public class AdminDashboardFrame extends JFrame {
     }
 
     // ── Sales ─────────────────────────────────────────────
-    private JPanel buildSalesPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Theme.BACKGROUND);
-        panel.setBorder(BorderFactory.createEmptyBorder(16, 20, 20, 20));
-        salesTable.setRowHeight(36);
-        salesTable.setFont(Theme.BODY_FONT);
-        panel.add(new JScrollPane(salesTable), BorderLayout.CENTER);
-        return panel;
-    }
+		
+	private JPanel buildSalesPanel() {
+		JPanel panel = new JPanel(new BorderLayout());
+		panel.setBackground(Theme.BACKGROUND);
+		panel.setBorder(BorderFactory.createEmptyBorder(16, 20, 20, 20));
+
+		// Filter bar
+		JPanel filterBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 10));
+		filterBar.setBackground(Theme.BACKGROUND);
+
+		JTextField fromField = new JTextField(10);
+		JTextField toField   = new JTextField(10);
+		JComboBox<String> catBox = new JComboBox<>();
+		Theme.styleField(fromField);
+		Theme.styleField(toField);
+		catBox.setFont(Theme.BODY_FONT);
+		catBox.setForeground(Theme.TEXT);
+
+		try {
+		    for (String c : adminService.loadCategories()) catBox.addItem(c);
+		} catch (SQLException e) {
+		    catBox.addItem("All Categories");
+		}
+
+		JButton applyBtn = Theme.primaryButton("Apply Filter");
+		JButton clearBtn = Theme.secondaryButton("Clear");
+
+		applyBtn.addActionListener(e -> {
+		    try {
+		        salesTable.setModel(adminService.loadSalesSummaryFiltered(
+		                fromField.getText().trim(),
+		                toField.getText().trim(),
+		                (String) catBox.getSelectedItem()));
+		        salesTable.setRowHeight(36);
+		        salesTable.setFont(Theme.BODY_FONT);
+		    } catch (SQLException ex) { showError(ex); }
+		});
+		clearBtn.addActionListener(e -> {
+		    fromField.setText(""); toField.setText(""); catBox.setSelectedIndex(0);
+		    try {
+		        salesTable.setModel(adminService.loadSalesSummary());
+		        salesTable.setRowHeight(36);
+		        salesTable.setFont(Theme.BODY_FONT);
+		    } catch (SQLException ex) { showError(ex); }
+		});
+
+		filterBar.add(lbl("From (YYYY-MM-DD)")); filterBar.add(fromField);
+		filterBar.add(lbl("To (YYYY-MM-DD)"));   filterBar.add(toField);
+		filterBar.add(lbl("Category"));          filterBar.add(catBox);
+		filterBar.add(applyBtn);                 filterBar.add(clearBtn);
+
+		salesTable.setRowHeight(36);
+		salesTable.setFont(Theme.BODY_FONT);
+
+		panel.add(filterBar, BorderLayout.NORTH);
+		panel.add(new JScrollPane(salesTable), BorderLayout.CENTER);
+		return panel;
+	}
+
+	private JLabel lbl(String text) {
+		JLabel l = new JLabel(text);
+		l.setFont(Theme.BODY_FONT);
+		l.setForeground(Theme.TEXT);
+		return l;
+	}
 
     // ── Users ─────────────────────────────────────────────
     private JPanel buildUsersPanel() {
@@ -266,6 +323,9 @@ public class AdminDashboardFrame extends JFrame {
                     phone.isBlank() ? null : phone, fullName,
                     password.isBlank() ? null : password);
             JOptionPane.showMessageDialog(this, "Profile updated successfully.");
+            session.setFullName(fullName);
+			infoLabel.setText("Signed in as " + fullName);
+			setTitle("Admin Dashboard - " + fullName);
             profPasswordField.setText("");
         } catch (SQLException e) {
             showError(e);
